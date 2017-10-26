@@ -1,0 +1,1 @@
+FreeFem++ GenMesh.edp --config 1

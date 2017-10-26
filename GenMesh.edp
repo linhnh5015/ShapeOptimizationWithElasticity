@@ -1,0 +1,139 @@
+include "getARGV.idp"
+
+int config = getARGV("--config", 1);
+
+if(config == 1)                                                           
+{
+    real r = 0.3;
+
+    border L11(t=-3.3,3.7){ x=t; y=-1.5; label=3; }
+    border L21(t=-1.5,-0.2){ x=3.7; y=t; label=3; }
+    border L22(t=-0.2,0.2){ x=3.7; y=t; label=2; }
+    border L23(t=0.2,1.5){ x=3.7; y=t; label=3; }
+    border L31(t=3.7, -3.3){ x=t; y=1.5; label=3; }
+    border L41(t=1.5,1.2){ x=-3.3; y=t; label=1; }
+    border L42(t=1.2,-1.2){ x=-3.3; y=t; label=3; }
+    border L43(t=-1.2,-1.5){ x=-3.3; y=t; label=1; }
+
+    
+    border C11(t=0,2*pi){ x=-2.5+r*cos(t); y=0.8+r*sin(t); label=3;  }
+    border C12(t=0,2*pi){ x=-0.3+r*cos(t); y=0.8+r*sin(t); label=3;  }
+    border C13(t=0,2*pi){ x=1.9+r*cos(t); y=0.8+r*sin(t); label=3;  }
+    border C21(t=0,2*pi){ x=-1.4+r*cos(t); y=r*sin(t); label=3;  }
+    border C22(t=0,2*pi){ x=0.8+r*cos(t); y=r*sin(t); label=3;  }
+    border C23(t=0,2*pi){ x=3+r*cos(t); y=r*sin(t); label=3;  }
+    border C31(t=0,2*pi){ x=-2.5+r*cos(t); y=-0.8+r*sin(t); label=3;  }
+    border C32(t=0,2*pi){ x=-0.3+r*cos(t); y=-0.8+r*sin(t); label=3;  }
+    border C33(t=0,2*pi){ x=1.9+r*cos(t); y=-0.8+r*sin(t); label=3;  }
+
+    int nn = 2;
+    mesh Th=buildmesh(L11(88*nn) + L21(18*nn) + L22(4*nn) + L23(18*nn) + L31(88*nn) + L41(4*nn) + L42(32*nn) + L43(4*nn)
+        + C11(-30*nn) + C12(-30*nn) + C13(-30*nn) + C21(-30*nn) + C22(-30*nn) + 
+        C23(-30*nn) + C31(-30*nn) + C32(-30*nn) + C33(-30*nn));
+    plot(Th);
+
+    savemesh(Th, "meshes/mesh1.mesh");
+}
+if(config == 2)                                                           
+{
+    real r = 0.1;
+
+    border L11a(t=1,0.8){ x=t; y=1; label=3; }
+	border L11b(t=0.6,0.10){ x=t; y=1; label=3; }
+	border L11c(t=-0.10,-0.6){ x=t; y=1; label=3; }
+	border L11d(t=-0.8,-1){ x=t; y=1; label=3; }
+	
+    border L21(t=1,0){ x=-1; y=t; label=3; }
+	
+    border L12a(t=-1,-0.8){ x=t; y=0; label=2; }
+	border L12b(t=-0.8,-0.5){ x=t; y=0; label=3; }
+	
+    border L22(t=0,-2){ x=-0.5; y=t; label=3; }
+	
+    border L13a(t=-0.5,-0.35){ x=t; y=-2; label=1; }
+	border L13b(t=-0.35,0.35){ x=t; y=-2; label=3; }
+	border L13c(t=0.35,0.5){ x=t; y=-2; label=1; }
+	
+	border L23(t=-2,0){ x=0.5; y=t; label=3; }
+	
+	border L14a(t=0.5,0.8){ x=t; y=0; label=3; }
+	border L14b(t=0.8,1){ x=t; y=0; label=2; }
+	
+	border L24(t=0,1){ x=1; y=t; label=3; }
+    
+    border C11(t=0,2*pi){ x=r*cos(t); y=-0.5+r*sin(t); label=3;  }
+	border C12(t=0,2*pi){ x=r*cos(t); y=-1+r*sin(t); label=3;  }
+	border C13(t=0,2*pi){ x=r*cos(t); y=-1.5+r*sin(t); label=3;  }
+	
+    border C21(t=0,2*pi){ x=-0.7+r*cos(t); y=0.3+r*sin(t); label=3;  }
+    border C22(t=0,2*pi){ x=r*cos(t); y=0.3+r*sin(t); label=3;  }
+    border C23(t=0,2*pi){ x=0.7+r*cos(t); y=0.3+r*sin(t); label=3;  }
+	
+    border C31(t=2*pi,pi){ x=-0.7+r*cos(t); y=1+r*sin(t); label=3;  }
+    border C32(t=2*pi,pi){ x=r*cos(t); y=1+r*sin(t); label=3;  }
+	border C33(t=2*pi,pi){ x=0.7+r*cos(t); y=1+r*sin(t); label=3;  }
+
+    int nn = 1;
+    mesh Th=buildmesh( L11a(20*nn) + L11b(40*nn) + L11c(40*nn) + L11d(20*nn) + L21(100*nn) + L12a(20*nn) + L12b(30*nn) 
+	    + L22(200*nn) + L13a(15*nn) + L13b(70*nn) + L13c(15*nn) + L23(200*nn) + L14a(30*nn) + L14b(20*nn) + L24(100*nn)
+        + C11(-80*nn) + C12(-80*nn) + C13(-80*nn) + C21(-80*nn) + C22(-80*nn) + C23(-80*nn) + C31(40*nn) + C32(40*nn) + C33(40*nn));
+    plot(Th);
+
+    savemesh(Th, "meshes/mesh2.mesh");
+}
+if(config == 3)                                                           
+{
+    real r = 0.1;
+
+    border L11(t=-1,-0.8){ x=t; y=0; label=1; }
+	border L12(t=-0.8,-0.2){ x=t; y=0; label=3; }
+	border L13(t=-0.2,0.2){ x=t; y=0; label=2; }
+	border L14(t=0.2,0.8){ x=t; y=0; label=3; }
+	border L15(t=0.8,1){ x=t; y=0; label=1; }
+	
+    border L2(t=0,1){ x=1; y=t; label=3; }
+	border L3(t=1,-1){ x=t; y=1; label=3; }
+	border L4(t=1,0){ x=-1; y=t; label=3; }
+    
+    border C1(t=0,2*pi){ x=-0.6+r*cos(t); y=0.25+r*sin(t); label=3;  }
+	border C2(t=0,2*pi){ x=-0.2+r*cos(t); y=0.25+r*sin(t); label=3;  }
+	border C3(t=0,2*pi){ x=0.2+r*cos(t); y=0.25+r*sin(t); label=3;  }
+	border C4(t=0,2*pi){ x=0.6+r*cos(t); y=0.25+r*sin(t); label=3;  }
+
+    int nn = 1;
+    mesh Th=buildmesh( L11(20*nn) + L12(60*nn) + L13(40*nn) + L14(60*nn) + L15(20*nn) + L2(100*nn) + L3(200*nn) + L4(100*nn)
+        + C1(-80*nn) + C2(-80*nn) + C3(-80*nn) + C4(-80*nn));
+    plot(Th);
+
+    savemesh(Th, "meshes/mesh3.mesh");
+}
+if(config == 4)                                                           
+{
+    real r = 0.1;
+
+    border L1(t=2,-2){ x=t; y=1; label=2; }
+	
+	border L21(t=0,0.5){ x=-2+t; y=1-t; label=3; }
+	border L22(t=0,0.3){ x=-1.5+t; y=0.5-t; label=1; }
+	border L23(t=0,0.2){ x=-1.2+t; y=0.2-t; label=3; }
+	
+	border L3(t=-1,1){ x=t; y=0; label=3; }
+	
+	border L41(t=0,0.2){ x=1+t; y=t; label=3; }
+	border L42(t=0,0.3){ x=1.2+t; y=0.2+t; label=1; }
+	border L43(t=0,0.5){ x=1.5+t; y=0.5+t; label=3; }
+    
+    border C1(t=0,2*pi){ x=-1.25+r*cos(t); y=0.75+r*sin(t); label=3;  }
+	border C2(t=0,2*pi){ x=-0.75+r*cos(t); y=0.75+r*sin(t); label=3;  }
+	border C3(t=0,2*pi){ x=-0.25+r*cos(t); y=0.75+r*sin(t); label=3;  }
+	border C4(t=0,2*pi){ x=0.25+r*cos(t); y=0.75+r*sin(t); label=3;  }
+	border C5(t=0,2*pi){ x=0.75+r*cos(t); y=0.75+r*sin(t); label=3;  }
+	border C6(t=0,2*pi){ x=1.25+r*cos(t); y=0.75+r*sin(t); label=3;  }
+
+    int nn = 1;
+    mesh Th=buildmesh( L1(400*nn) + L21(70*nn) + L22(42*nn) + L23(28*nn) + L3(200*nn) + L41(28*nn) + L42(42*nn) + L43(70*nn)
+        + C1(-80*nn) + C2(-80*nn) + C3(-80*nn) + C4(-80*nn) + C5(-80*nn) + C6(-80*nn));
+    plot(Th);
+
+    savemesh(Th, "meshes/mesh4.mesh");
+}

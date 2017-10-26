@@ -1,0 +1,20 @@
+-config		configuration number, from 1 to 5
+--resu		folder in which the files and results will be saved, created if non-existent
+--raffinit	required edge size when remeshing : hmax=raffinit, hmin=raffinit/sqrt(2)
+--optraff	1=remesh if necessary, 0=no remeshing
+--minarea	remesh if any element has an area less than minarea
+--binit		initial value for b
+--btarget	final value for b : b is no longer updated if b >= btarget
+--tau		value of tau, step of the gradient method
+--l0		initial value of the Lagrange multiplier
+--gamma		value of the regularization parameter
+--jjmax		maximal number of outer iterations
+--errc		value for the stopping criterion \eps_{stop} on the residual
+--beta		0 for perimeter constraint, 1 for volume constraint (default)
+--delta		Select the functional : 0 for the dissipated energy, 1 for the least-square profile at the outlet
+--cv		Ratio (required constraint value)/(initial constraint value). 1 for an identical initial and required volume or perimeter
+--alpha		Update ratio for b : b^{n+1}=alpha*b^n
+--save		1=save all figures in the result directory, 0=save nothing at all
+--saveevery n	figures will be saved every n iterations
+--regul		1=regulbordv1, 2=regulbordv2 (default)
+--augLag	1=augmented Lagrange (default), 0=Lagrange
