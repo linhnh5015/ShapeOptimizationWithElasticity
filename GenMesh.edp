@@ -1,8 +1,8 @@
 include "getARGV.idp"
 
 int config = getARGV("--config", 1);
-
-if(config == 1)                                                           
+//1:Dirichlet, 2: Neumann, 3:free
+if(config == 1)          //cantilever                                                 
 {
     real r = 0.3;
 
@@ -34,19 +34,16 @@ if(config == 1)
 
     savemesh(Th, "meshes/mesh1.mesh");
 }
-if(config == 2)                                                           
+if(config == 2)                      //mast                                     
 {
     real r = 0.1;
 
-    border L11a(t=1,0.8){ x=t; y=1; label=3; }
-	border L11b(t=0.6,0.10){ x=t; y=1; label=3; }
-	border L11c(t=-0.10,-0.6){ x=t; y=1; label=3; }
-	border L11d(t=-0.8,-1){ x=t; y=1; label=3; }
+	border L11(t = 0.9,-0.9){ x=t; y=0.75; label=3; };
+	border Ca (t = 2*pi, 1.5*pi) {x = -1 + r*cos(t); y = 0.75 + r*sin(t); label = 3;};
 	
-    border L21(t=1,0){ x=-1; y=t; label=3; }
+    border L21(t=0.65,0){ x=-1; y=t; label=3; }
 	
-    border L12a(t=-1,-0.8){ x=t; y=0; label=2; }
-	border L12b(t=-0.8,-0.5){ x=t; y=0; label=3; }
+	border L12(t=-1,-0.5){ x=t; y=0; label=2; }
 	
     border L22(t=0,-2){ x=-0.5; y=t; label=3; }
 	
@@ -56,32 +53,27 @@ if(config == 2)
 	
 	border L23(t=-2,0){ x=0.5; y=t; label=3; }
 	
-	border L14a(t=0.5,0.8){ x=t; y=0; label=3; }
-	border L14b(t=0.8,1){ x=t; y=0; label=2; }
+	border L14 (t=0.5,1){ x=t; y=0; label=2; }
 	
-	border L24(t=0,1){ x=1; y=t; label=3; }
-    
-    border C11(t=0,2*pi){ x=r*cos(t); y=-0.5+r*sin(t); label=3;  }
-	border C12(t=0,2*pi){ x=r*cos(t); y=-1+r*sin(t); label=3;  }
-	border C13(t=0,2*pi){ x=r*cos(t); y=-1.5+r*sin(t); label=3;  }
+	border L24(t=0,0.65){ x=1; y=t; label=3; }
+	border Cb (t = 1.5*pi, 1*pi) {x = 1 + r*cos(t); y = 0.75 + r*sin(t); label = 3;};
+	border C12(t=0,2*pi){ x=2*r*cos(t); y=-1+2.5*2*r*sin(t); label=3;  }
 	
-    border C21(t=0,2*pi){ x=-0.7+r*cos(t); y=0.3+r*sin(t); label=3;  }
-    border C22(t=0,2*pi){ x=r*cos(t); y=0.3+r*sin(t); label=3;  }
-    border C23(t=0,2*pi){ x=0.7+r*cos(t); y=0.3+r*sin(t); label=3;  }
-	
-    border C31(t=2*pi,pi){ x=-0.7+r*cos(t); y=1+r*sin(t); label=3;  }
-    border C32(t=2*pi,pi){ x=r*cos(t); y=1+r*sin(t); label=3;  }
-	border C33(t=2*pi,pi){ x=0.7+r*cos(t); y=1+r*sin(t); label=3;  }
+    border C21(t=0,2*pi){ x=-0.7+1.2*r*cos(t); y=0.3+1.2*r*sin(t); label=3;  }
+    border C22(t=0,2*pi){ x=1.2*r*cos(t); y=0.3+1.2*r*sin(t); label=3;  }
+    border C23(t=0,2*pi){ x=0.7+1.2*r*cos(t); y=0.3+1.2*r*sin(t); label=3;  }
 
     int nn = 1;
-    mesh Th=buildmesh( L11a(20*nn) + L11b(40*nn) + L11c(40*nn) + L11d(20*nn) + L21(100*nn) + L12a(20*nn) + L12b(30*nn) 
-	    + L22(200*nn) + L13a(15*nn) + L13b(70*nn) + L13c(15*nn) + L23(200*nn) + L14a(30*nn) + L14b(20*nn) + L24(100*nn)
-        + C11(-80*nn) + C12(-80*nn) + C13(-80*nn) + C21(-80*nn) + C22(-80*nn) + C23(-80*nn) + C31(40*nn) + C32(40*nn) + C33(40*nn));
+    mesh Th=buildmesh(L11(100*nn)
+		+ L21(50*nn) + L12(25*nn)
+	    + L22(100*nn) + L13a(8*nn) + L13b(35*nn) + L13c(8*nn) + L23(100*nn) + L14(25*nn) + L24(50*nn)
+		+ Ca(8*nn) + Cb(8*nn)
+         + C12(-120*nn)  + C21(-40*nn) + C22(-40*nn) + C23(-40*nn));
     plot(Th);
 
     savemesh(Th, "meshes/mesh2.mesh");
 }
-if(config == 3)                                                           
+if(config == 3)                                  //bridge                         
 {
     real r = 0.1;
 
@@ -107,7 +99,7 @@ if(config == 3)
 
     savemesh(Th, "meshes/mesh3.mesh");
 }
-if(config == 4)                                                           
+if(config == 4)                                          //                 
 {
     real r = 0.1;
 
@@ -136,4 +128,76 @@ if(config == 4)
     plot(Th);
 
     savemesh(Th, "meshes/mesh4.mesh");
+}
+if(config == 5){					//bridge1hole
+	border L1(t=2,-2){x = t; y = 1; label = 3;}
+	border L2 (t=1,0){x = -2; y= t; label = 3;}
+	border L31 (t= -2, -1.8){x = t; y = 0; label = 1;}
+	border L31a (t= -1.8, -1.1){x = t; y = 0; label = 3;}
+	border L31b (t= -1.1, -0.9){x = t; y = 0; label = 1;}
+	border L32 (t = -0.9, -0.2){x = t; y = 0; label = 3;}
+	border L33 (t = -0.2,0.2){x = t; y = 0; label = 2;}
+	border L34 (t = 0.2, 0.9){x = t; y = 0; label = 3;}
+	border L34a (t = 0.9, 1.1){x = t; y = 0; label = 1;}
+	border L34b (t = 1.1, 1.8){x = t; y = 0; label = 3;}
+	border L35 (t = 1.8, 2){x = t; y = 0; label = 1;}
+	border L4 (t = 0,1){x = 2; y= t; label = 3;}
+	
+	real r = 0.2;
+	border C1 (t = 0,2*pi){x = r*cos(t);y = 0.5 + r*sin(t); label = 3;}
+	//border C2 (t = 0,2*pi){x = -1 + r*cos(t);y = 0.5 + r*sin(t); label = 3;}
+	//border C3 (t = 0,2*pi){x = 1 + r*cos(t);y = 0.5 + r*sin(t); label = 3;}
+	
+	int nn = 2;
+	mesh Th=buildmesh(L1(80*nn) + L2(20*nn) 
+	+ L31(4*nn) + L32(20*nn) + L33(10*nn) + L34(20*nn) + L35(4*nn)
+	+ L31a(15*nn)+ L31b(5*nn)+ L34a(5*nn)+ L34b(15*nn)
+	+ L4(20*nn) + C1(-50*nn));//+ C2 (-50*nn)+ C3(-50*nn));
+	plot(Th);
+	savemesh(Th, "meshes/mesh5.mesh");
+}
+if(config == 6){				//grip
+	border L11(t = 1,0.8){x=t;y=1;label =2;}
+	border L12(t = 0.8,-1){x=t;y=1;label =3;}
+	border L21(t = 1,0.3){x=-1;y=t;label =3;}
+	
+	border L22(t = -1,-0.8){x=t;y=0.3;label =1;}
+	border L23(t = 0.3,-0.3){x=-0.8;y=t;label =3;}
+	border L24(t = -0.8,-1){x=t;y=-0.3;label =1;}
+	
+	border L25(t = -0.3,-1){x=-1;y=t;label =3;}
+	
+	border L31 (t=-1,0.8){x=t;y=-1;label =3;}
+	border L32 (t=0.8,1){x=t;y=-1;label = 4;}
+	
+	border L4 (t=-1,1){x=1;y=t;label =3;}
+	
+	int nn = 1;
+	mesh Th = buildmesh(L11(50*nn) + L12(70*nn)
+	+L21(25*nn) + L22(50*nn) + L23(20*nn) + L24(50*nn) + L25(25*nn)
+	+L31(70*nn) + L32(50*nn) 
+	+L4(50*nn));
+	plot(Th);
+	savemesh(Th, "meshes/mesh6.mesh");
+}
+
+if(config == 7){ 		//grip
+	real r = 0.1;
+	border L1(t = -0.5,-1){x=t;y=1;label=2;}
+	border L2(t=1,-1){x=-1;y=t;label=3;}
+	border L3(t=-1,-0.5){x=t;y=-1;label=4;}
+	border L4(t=-0.5,1){x = t; y=0.5*(t-1.5);label = 3;}
+	border L5(t=1,0.75){x=t;y=-0.25;label=3;}
+	border L6(t=-0.25,0.25){x=0.75;y=t;label = 3;}
+	border L7 (t=0.75,1){x=t;y=0.25;label=3;}
+	border L8 (t=1,-0.5){x=t;y=-0.5*(t-1.5);label=3;}
+	
+	border C1 (t=0,2*pi){x=0.25 + r*cos(t);y=r*sin(t);label=1;}
+	border C2 (t=0,2*pi){x=-0.5 + r*cos(t);y=0.7+r*sin(t);label=3;}
+	border C3 (t=0,2*pi){x=-0.5 + r*cos(t);y=-0.7+r*sin(t);label=3;}
+	
+	mesh Th = buildmesh(L1(20) + L2(80) + L3(20) + L4(50) + L5(15) + L6(30) + L7(15) + L8(50)
+	+C1(-15) + C2(-15) + C3(-15));
+	plot(Th);
+	savemesh(Th, "meshes/mesh7.mesh");
 }

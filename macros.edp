@@ -5,6 +5,7 @@ macro tr(u) u' //EOM
 macro vol(Th) int2d(Th)(1.) //EOM
 macro contr(Th) vol(Th) // EOM
 macro IJ() (-1*tr(AEPS(ux,uy))*EPS(ux,uy)) //EOM
+//macro const0 (int2d(Th) (k*((ux - urefx)^2 + (uy - urefy)^2)^(alpha/2)))^(1/(alpha - 1)) //EOM
 
 macro J() (int2d(Th)(tr(AEPS(ux,uy))*EPS(ux,uy))) //EOM
 

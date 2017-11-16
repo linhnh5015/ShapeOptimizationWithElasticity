@@ -68,15 +68,20 @@ real c0 = vol0;
 
 /* Không gian hàm */
 fespace Vh(Th, P1);
-Vh ux, uy, vx, vy, dpx, dpy, phix, phiy;                        
+Vh ux, uy, vx, vy, dpx, dpy, phix, phiy, px, py, qx, qy; 
 
 
 /* Giải bài toán elastic */
 problem elastic([ux, uy], [vx, vy]) =
   int2d(Th)(lambda*div(ux, uy)*div(vx, vy) + 2.*mu*(tr(EPS(ux, uy))*EPS(vx,vy))) 
   - int1d(Th, 2)(-1*vy)
+  - int1d(Th, 4)(vy)
   + on(1, ux=0, uy=0);
 
+//problem adjoint([px, py], [qx, qy]) =
+//  int2d(Th)(lambda*div(px, py)*div(qx, qy) + 2.*mu*(tr(EPS(px, py))*EPS(qx,qy)))
+//	+ int2d(Th) (const0*k*((ux - urefx)^2 + (uy - urefy)^2)^(alpha-2)*((ux - urefx)*qx + (uy - urefy)*qy))
+//	+ on (1, px = 0, py = 0);
   
 /* Các regular border (smoothing)*/
 macro regulbordv1() {
@@ -85,7 +90,7 @@ macro regulbordv1() {
     +int1d(Th, 3)(gamma1*tr(gradT(dpx))*gradT(phix))
     +int1d(Th, 3)(gamma1*tr(gradT(dpy))*gradT(phiy))
     +int1d(Th, 3)(gradDF*dotN(phix, phiy))
-    +on(1, 2, dpx=0, dpy=0);
+    +on(1, 2, 4, dpx=0, dpy=0);
 } //EOM
 
 macro regulbordv2() {
@@ -93,7 +98,7 @@ macro regulbordv2() {
     int2d(Th)(gamma*tr(EPS(dpx, dpy))*EPS(phix, phiy))
 	+int2d(Th)(dpx*phix + dpy*phiy)
     +int1d(Th, 3)(gradDF*dotN(phix, phiy))
-    +on(1, 2, dpx=0, dpy=0);
+    +on(1, 2, 4, dpx=0, dpy=0);
 } //EOM
 
 
