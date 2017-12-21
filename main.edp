@@ -78,10 +78,10 @@ problem elastic([ux, uy], [vx, vy]) =
   - int1d(Th, 4)(vy)
   + on(1, ux=0, uy=0);
 
-//problem adjoint([px, py], [qx, qy]) =
-//  int2d(Th)(lambda*div(px, py)*div(qx, qy) + 2.*mu*(tr(EPS(px, py))*EPS(qx,qy)))
-//	+ int2d(Th) (const0*k*((ux - urefx)^2 + (uy - urefy)^2)^(alpha-2)*((ux - urefx)*qx + (uy - urefy)*qy))
-//	+ on (1, px = 0, py = 0);
+problem adjoint([px, py], [qx, qy]) =
+  int2d(Th)(lambda*div(px, py)*div(qx, qy) + 2.*mu*(tr(EPS(px, py))*EPS(qx,qy)))
+	+ int2d(Th) (const0*k*((ux - urefx)^2 + (uy - urefy)^2)^(alpha-2)*((ux - urefx)*qx + (uy - urefy)*qy))
+	+ on (1, px = 0, py = 0);
   
 /* Các regular border (smoothing)*/
 macro regulbordv1() {
