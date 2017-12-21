@@ -1,0 +1,1 @@
+FreeFem++ main.edp --config 3 --resu resu\case3\grip\test_gamma_0p5_l20 --tau 5e-3 --optraff 1 --raffinit 3e-2 --kc -1 --errc 2e-2 --regul 2 --l 3 --gamma 0.9

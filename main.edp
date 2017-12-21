@@ -1,0 +1,212 @@
+include "getARGV.idp"
+include "macros.edp"
+
+load "medit";
+
+int config = getARGV("--config", 1);
+
+mesh Th;
+string meshname = "meshes/mesh"+config+".mesh";
+cout << "Loading mesh " << meshname << "...";
+Th = readmesh(meshname);
+cout << "done." << endl;
+cout.flush;
+
+mesh Th2;
+
+cout.precision(12);
+
+/* Save results */
+int save = getARGV("--save", 1);                          
+//////////////////////////////////////////////////////////////////////////
+
+/* Numerical parameters */
+real E = 1, nu = 0.3, mu = E/(2*(1+nu));
+real lambda = E*nu/((1+nu)*(1-2*nu));
+
+real errc = getARGV("--errc", 1e-2);
+real tau = getARGV("--tau", 1e-3);
+real l = getARGV("--l", 1e1);
+
+int iimax = getARGV("--iimax", 5);
+int jjmax = getARGV("--jjmax", 3000);
+int kkmax = getARGV("--kkmax", 3);
+
+real rafftarget = getARGV("--rafftarget", 1e30); /* Par défaut, pas de raffinement variable */
+real raffinit = getARGV("--raffinit",1./30);
+int optraff = getARGV("--optraff", 1);
+real gamma = getARGV("--gamma", 0.95);
+real minarea0 = getARGV("--minarea", 1e-4);
+int every = getARGV("--saveevery", 3);
+
+/* Đọc tham số regular border */
+int regul = getARGV("--regul", 2);
+
+real minarea;
+real gamma1 = 1-gamma;
+
+int ii, jj, kk;
+
+real sv;                                                 
+
+real J0, J1, L, L0, L1;                                  
+real tau1;
+real kmax;
+
+real raff = raffinit;
+
+int ct = 0;
+
+/* Constraint data */
+real vol0 = vol(Th);
+real c0 = vol0;
+
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+
+/* Không gian hàm */
+fespace Vh(Th, P1);
+Vh ux, uy, vx, vy, dpx, dpy, phix, phiy, px, py, qx, qy; 
+
+
+/* Giải bài toán elastic */
+problem elastic([ux, uy], [vx, vy]) =
+  int2d(Th)(lambda*div(ux, uy)*div(vx, vy) + 2.*mu*(tr(EPS(ux, uy))*EPS(vx,vy))) 
+  - int1d(Th, 2)(-1*vy)
+  - int1d(Th, 4)(vy)
+  + on(1, ux=0, uy=0);
+
+problem adjoint([px, py], [qx, qy]) =
+  int2d(Th)(lambda*div(px, py)*div(qx, qy) + 2.*mu*(tr(EPS(px, py))*EPS(qx,qy)))
+	+ int2d(Th) (const0*k*((ux - urefx)^2 + (uy - urefy)^2)^(alpha-2)*((ux - urefx)*qx + (uy - urefy)*qy))
+	+ on (1, px = 0, py = 0);
+  
+/* Các regular border (smoothing)*/
+macro regulbordv1() {
+  solve regbv1([dpx, dpy],[phix, phiy]) =
+    int2d(Th)(gamma*tr(EPS(dpx, dpy))*EPS(phix, phiy))
+    +int1d(Th, 3)(gamma1*tr(gradT(dpx))*gradT(phix))
+    +int1d(Th, 3)(gamma1*tr(gradT(dpy))*gradT(phiy))
+    +int1d(Th, 3)(gradDF*dotN(phix, phiy))
+    +on(1, 2, 4, dpx=0, dpy=0);
+} //EOM
+
+macro regulbordv2() {
+  solve regbv2([dpx, dpy],[phix, phiy]) =
+    int2d(Th)(gamma*tr(EPS(dpx, dpy))*EPS(phix, phiy))
+	+int2d(Th)(dpx*phix + dpy*phiy)
+    +int1d(Th, 3)(gradDF*dotN(phix, phiy))
+    +on(1, 2, 4, dpx=0, dpy=0);
+} //EOM
+
+
+/* Tạo thư mục ghi file */	   
+string outputFolder = getARGV("--resu", "");
+cout << "Results and figures will be saved in " << outputFolder << endl;
+system("mkdir "+outputFolder);
+
+ofstream c0of(outputFolder+"/c0");
+c0of << c0 << endl;
+c0of.flush;
+
+
+/* Lưu lưới khởi tạo */
+savemesh(Th, outputFolder+"/initmesh.mesh");
+
+
+/* Lưu command chạy */
+ofstream cmd(outputFolder+"/commande.sh");
+for (int ii = 0; ii < ARGV.n; ii++)
+  cmd << ARGV[ii] << " ";
+cmd << endl;
+cmd.flush;
+
+
+/* Lưu file out.dat */ 
+ofstream r(outputFolder+"/out.dat");
+
+elastic;	    
+
+/* Ghi J0 */
+J0 = J;
+ofstream j0of(outputFolder+"/J0");
+j0of << J0 << endl;
+j0of.flush;
+
+
+/* Bắt đầu vòng lặp */
+sv = 1+errc; // Arbitrary choice of sv such that sv > errc
+for (jj = 0; (sv > errc) && (jj < jjmax); jj++) {
+  for (ii = 0; ii < iimax; ii++) {
+    Th2 = Th;
+	
+    elastic;
+	if (regul == 1){
+		regulbordv1;
+	}
+	else if (regul == 2){
+		regulbordv2;
+	}
+	
+    L0 = EL;
+    tau1 = tau;
+    for (kk = 0;kk < kkmax; kk++) {
+      cout << "movemesh tau = "<< tau1 << endl;
+      minarea = checkmovemesh(Th2, [x + tau1*dpx, y + tau1*dpy]);
+      if (optraff) {
+        if (minarea > minarea0) {
+          Th = movemesh(Th2, [x + tau1*dpx, y + tau1*dpy]);
+        } else {
+          cout << "*** ADAPTMESH *** minarea = " << minarea << " minarea0 = " << minarea0;
+          Th = adaptmesh(Th, hmax=raff, hmin=raff/sqrt(2), ratio=1.5);
+          minarea = checkmovemesh(Th2, [x + tau1*dpx, y + tau1*dpy]);
+          cout << " new minarea = " << minarea << endl;
+        }
+      }
+      else {
+        Th = movemesh(Th2, [x + tau1*dpx, y + tau1*dpy]);
+      }
+      elastic;
+      L1 = EL;
+      tau1/= 2;
+      cout << "L = " << L1 << " / L0 = " << L0 << " (variation = " << 100*(L1-L0)/L0 << "%)" << endl;
+      if (L1 < L0)
+        break;
+    }
+    cout << "kk = " << kk << endl;
+    if (kk == kkmax) {
+      cout << "Warning : L_{n+1}>L_{n} (L0 = " << L0 << ", l = " << l << ")" << endl;
+      ii = iimax; /* Update the Lagrange multiplier, since we can't further decrease L */
+    }
+    sv = sqrt(int1d(Th, 3)(dpx^2+dpy^2));
+  /* OUTPUT */
+    r << J << " " <<  EL << " " << contr(Th) << " " << sv << " " << minarea << endl;
+  }
+  
+  /* Save post-processing data */
+  
+  if (save && (jj % every == 0)) {
+    plot(Th, [dpx, dpy], ps=outputFolder+"/displacement"+ct+".ps", wait=0, value=1, cmm="Iteration "+jj+"/"+jjmax+" (config "+config+")");
+    plot(Th, [ux, uy], ps=outputFolder+"/velocity"+ct+".ps", wait=0, value=1, cmm="Iteration "+jj+"/"+jjmax+" (config "+config+")");
+    savesol(outputFolder+"/mesh"+ct+".sol", Th, [ux, uy]);
+  
+    plot(Th, ps=outputFolder+"/mesh"+ct+".ps", wait=0, value=1, cmm="Iteration "+jj+"/"+jjmax+" (config "+config+")");
+    savemesh(Th, outputFolder+"/mesh"+ct+".mesh");
+    
+    ct++;
+    r.flush;
+    J1 = J;
+    cout << "jj = " << jj << endl;
+  }
+}
+
+
+/* Save post-processing data */
+if (save) {
+  plot(Th, [ux,uy], ps=outputFolder+"/velocity.ps", cmm="Velocity", wait=0);
+  savesol(outputFolder+"/mesh_final.sol", Th, [ux, uy]);
+  savemesh(Th, outputFolder+"/mesh_final.mesh");
+  r.flush;
+}
