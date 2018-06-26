@@ -51,7 +51,6 @@ real sv;
 
 real J0, J1, L, L0, L1;                                  
 real tau1;
-real kmax;
 
 real raff = raffinit;
 
@@ -66,12 +65,12 @@ real c0 = vol0;
 //////////////////////////////////////////////////////////////////////////
 
 
-/* Không gian hàm */
+/* Finite element spaces */
 fespace Vh(Th, P1);
 Vh ux, uy, vx, vy, dpx, dpy, phix, phiy, px, py, qx, qy; 
 
 
-/* Giải bài toán elastic */
+/* Solve elastic problem */
 problem elastic([ux, uy], [vx, vy]) =
   int2d(Th)(lambda*div(ux, uy)*div(vx, vy) + 2.*mu*(tr(EPS(ux, uy))*EPS(vx,vy))) 
   - int1d(Th, 2)(-1*vy)
@@ -83,7 +82,7 @@ problem adjoint([px, py], [qx, qy]) =
 	+ int2d(Th) (const0*k*((ux - urefx)^2 + (uy - urefy)^2)^(alpha-2)*((ux - urefx)*qx + (uy - urefy)*qy))
 	+ on (1, px = 0, py = 0);
   
-/* Các regular border (smoothing)*/
+/* Regularization Extension proceduces */
 macro regulbordv1() {
   solve regbv1([dpx, dpy],[phix, phiy]) =
     int2d(Th)(gamma*tr(EPS(dpx, dpy))*EPS(phix, phiy))
@@ -101,8 +100,7 @@ macro regulbordv2() {
     +on(1, 2, 4, dpx=0, dpy=0);
 } //EOM
 
-
-/* Tạo thư mục ghi file */	   
+   
 string outputFolder = getARGV("--resu", "");
 cout << "Results and figures will be saved in " << outputFolder << endl;
 system("mkdir "+outputFolder);
@@ -112,24 +110,21 @@ c0of << c0 << endl;
 c0of.flush;
 
 
-/* Lưu lưới khởi tạo */
 savemesh(Th, outputFolder+"/initmesh.mesh");
 
 
-/* Lưu command chạy */
+/* Save command */
 ofstream cmd(outputFolder+"/commande.sh");
 for (int ii = 0; ii < ARGV.n; ii++)
   cmd << ARGV[ii] << " ";
 cmd << endl;
 cmd.flush;
 
-
-/* Lưu file out.dat */ 
 ofstream r(outputFolder+"/out.dat");
 
 elastic;	    
 
-/* Ghi J0 */
+/* Save J0 */
 J0 = J;
 ofstream j0of(outputFolder+"/J0");
 j0of << J0 << endl;
